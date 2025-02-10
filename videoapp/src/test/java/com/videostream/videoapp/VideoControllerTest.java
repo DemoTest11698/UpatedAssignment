@@ -3,7 +3,9 @@ package com.videostream.videoapp;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.videostream.videoapp.controller.VideoController;
 import com.videostream.videoapp.entity.Video;
+import com.videostream.videoapp.entity.VideoStatus;
 import com.videostream.videoapp.service.VideoService;
+import com.videostream.videoapp.constant.URICONSTANT;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -14,13 +16,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 public class VideoControllerTest {
 
@@ -46,8 +48,18 @@ public class VideoControllerTest {
     private Video generateRandomVideo() {
         String randomId = UUID.randomUUID().toString();
         return new Video(
-                randomId, "Test Video", "Test synopsis", "Test Director", "Test Cast",
-                2023, "Action", 120, "ACTIVE", 1000, 500, "http://video.url"
+                randomId,
+                "Test Video",
+                "Test synopsis",
+                "Test Director",
+                "Test Cast",
+                2023,
+                "Action",
+                120,
+                VideoStatus.ACTIVE,  // Correct enum usage here
+                1000,
+                500,
+                "http://video.url"
         );
     }
 
@@ -57,7 +69,7 @@ public class VideoControllerTest {
 
         when(videoService.saveVideo(any(Video.class))).thenReturn(video);
 
-        mockMvc.perform(post("/videos/publish")
+        mockMvc.perform(post(URICONSTANT.BASE_PATH + URICONSTANT.PUBLISH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(video)))
                 .andExpect(status().isOk())
@@ -82,7 +94,7 @@ public class VideoControllerTest {
 
         doNothing().when(videoService).delistVideo(videoId);
 
-        mockMvc.perform(delete("/videos/delist/{id}", videoId))
+        mockMvc.perform(delete(URICONSTANT.BASE_PATH + URICONSTANT.DELIST, videoId))
                 .andExpect(status().isOk());
 
         verify(videoService, times(1)).delistVideo(videoId);
@@ -95,7 +107,7 @@ public class VideoControllerTest {
 
         when(videoService.loadVideo(videoId)).thenReturn(video);
 
-        mockMvc.perform(get("/videos/{id}", videoId))
+        mockMvc.perform(get(URICONSTANT.BASE_PATH + URICONSTANT.LOAD, videoId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Test Video"))
                 .andExpect(jsonPath("$.director").value("Test Director"))
@@ -118,7 +130,7 @@ public class VideoControllerTest {
 
         when(videoService.playVideo(videoId)).thenReturn(expectedResponse);
 
-        mockMvc.perform(get("/videos/play/{id}", videoId))
+        mockMvc.perform(get(URICONSTANT.BASE_PATH + URICONSTANT.PLAY, videoId))
                 .andExpect(status().isOk())
                 .andExpect(content().string(expectedResponse));
 
@@ -134,7 +146,7 @@ public class VideoControllerTest {
 
         when(videoService.listAllVideos()).thenReturn(videos);
 
-        mockMvc.perform(get("/videos"))
+        mockMvc.perform(get(URICONSTANT.BASE_PATH ))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].title").value(videos.get(0).getTitle()))
                 .andExpect(jsonPath("$[1].title").value(videos.get(1).getTitle()));
@@ -152,7 +164,7 @@ public class VideoControllerTest {
 
         when(videoService.searchVideos(query)).thenReturn(videos);
 
-        mockMvc.perform(get("/videos/search")
+        mockMvc.perform(get(URICONSTANT.BASE_PATH + URICONSTANT.SEARCH)
                         .param("query", query))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].title").value(videos.get(0).getTitle()))
@@ -168,7 +180,7 @@ public class VideoControllerTest {
 
         when(videoService.getVideoEngagement(videoId)).thenReturn(engagementStats);
 
-        mockMvc.perform(get("/videos/statistics/{id}", videoId))
+        mockMvc.perform(get(URICONSTANT.BASE_PATH + URICONSTANT.STATISTICS, videoId))
                 .andExpect(status().isOk())
                 .andExpect(content().string(engagementStats));
 

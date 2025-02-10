@@ -1,22 +1,14 @@
 package com.videostream.videoapp.entity;
 
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
 public class Video {
+
     @Id
     private String id;
 
-    private String title;
-
-    public Video() {
-    }
-
-    private String synopsis;
-
-    public Video(String id, String title, String synopsis, String director, String cast, int yearOfRelease, String genre, int runningTime, String status, int impressions, int views, String videoUrl) {
+    public Video(String id, String title, String synopsis, String director, String cast, int yearOfRelease, String genre, int runningTime, VideoStatus videoStatus, int impressions, int views, String videoUrl) {
         this.id = id;
         this.title = title;
         this.synopsis = synopsis;
@@ -25,14 +17,30 @@ public class Video {
         this.yearOfRelease = yearOfRelease;
         this.genre = genre;
         this.runningTime = runningTime;
-        this.status = status;
+        this.videoStatus = videoStatus;
         this.impressions = impressions;
         this.views = views;
         this.videoUrl = videoUrl;
     }
 
+    public Video() {
+    }
 
+    private String title;
+    private String synopsis;
+    private String director;
+    private String cast;
+    private int yearOfRelease;
+    private String genre;
+    private int runningTime; // in minutes
+    @Enumerated(EnumType.STRING)
+    private VideoStatus videoStatus; // Enum for Video Status (ACTIVE, INACTIVE)
+    private int impressions;
+    private int views;
+    @Column(unique = true)
+    private String videoUrl;
 
+    // Getters and Setters
     public String getId() {
         return id;
     }
@@ -97,12 +105,12 @@ public class Video {
         this.runningTime = runningTime;
     }
 
-    public String getStatus() {
-        return status;
+    public VideoStatus getStatus() {
+        return videoStatus;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setStatus(VideoStatus videoStatus) {
+        this.videoStatus = videoStatus;
     }
 
     public int getImpressions() {
@@ -128,15 +136,4 @@ public class Video {
     public void setVideoUrl(String videoUrl) {
         this.videoUrl = videoUrl;
     }
-
-    private String director;
-    private String cast;
-    private int yearOfRelease;
-    private String genre;
-    private int runningTime; // in minutes
-    private String status; // ACTIVE or DELISTED
-    private int impressions;
-    private int views ;
-    private String videoUrl;
-
 }
